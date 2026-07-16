@@ -1,0 +1,7 @@
+# Comparative Analysis: Metrics vs. Distributed Tracing
+
+When monitoring the `/complex-operation` endpoint, relying solely on aggregated metrics would only reveal high-level symptoms. If latency increased or the error rate spiked, metrics would show us that the overall endpoint is taking roughly 400ms to respond. However, metrics treat the service as a black box; they cannot tell us *where* inside the code the delay or error actually originated.
+
+Distributed tracing, via Jaeger, revealed exactly what metrics missed: the internal execution flow and the specific performance of individual functions. The trace broke down the overall request into a parent span with three clearly nested child spans.
+
+For example, looking at the actual trace in Jaeger, I could see the exact timeline of our internal functions. The trace explicitly showed that `computeHeavyResult` took ~200ms (representing the largest bottleneck), while `fetchDataFromCache` took ~150ms, and `validateInput` took only ~50ms. If this endpoint suddenly became slow in production, the trace allows us to instantly pinpoint whether the database cache or the CPU-heavy computation is at fault—something aggregated metrics completely hide.
